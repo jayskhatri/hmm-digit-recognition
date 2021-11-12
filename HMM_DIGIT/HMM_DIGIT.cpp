@@ -21,14 +21,10 @@
 const int WIN_SIZE  = (FRAME_SIZE * FRAMES);
 
 int T; //Time sequence length
-const int Tj = 150; 
+const int MAX_T = 150; // max time sequence length
 using namespace std;
 
 //Global variables
-int count_samples = 0;
-int index_max;
-int digit_count = 0;			//variable to store digits number, which is currently being tested.
-int Num_Recordings = 20;	
 long double dcShift, nFactor, mx, silenceEnergy;
 long double const threshold = 1e-30;   //Min threshold to be assigned to zero values in matrix B.
 long int sSize = 0, sampSize = 0, enSize = 0;
@@ -36,15 +32,15 @@ long double max_pobs_model = 0;
 int test_ans = 0, fake = 0;
 
 //Globally defined arrays
-int O[Tj+1];	//Observation sequence
-int Q[Tj+1];	//state sequence.
+int O[MAX_T+1];	//Observation sequence
+int Q[MAX_T+1];	//state sequence.
 long double pstar = 0, prev_p_star = -1;
-long double Alpha[Tj+1][N+1];
-long double Beta[Tj+1][N+1];
-long double Gamma[Tj+1][N+1];
-long double Delta[Tj+1][N+1];
-int Psi[Tj+1][N+1]; 
-long double Xi[Tj+1][N+1][N+1];
+long double Alpha[MAX_T+1][N+1];
+long double Beta[MAX_T+1][N+1];
+long double Gamma[MAX_T+1][N+1];
+long double Delta[MAX_T+1][N+1];
+int Psi[MAX_T+1][N+1]; 
+long double Xi[MAX_T+1][N+1][N+1];
 
 long double codeBook[CB_SIZE][P];
 
@@ -72,25 +68,19 @@ long double pi_average[N+1] = {0};
 char* A_file = "a_i_j.txt";
 char* B_file = "b_i_j.txt";
 char* PI_file = "pi.txt";
-char *avg_a_file = "avg_A.txt";
-char *avg_b_file = "avg_B.txt";
-char *avg_pi_file = "avg_Pi.txt";
 
-string alpha_file = "alpha";
-string beta_file = "beta";
-string gamma_file = "gamma";
-string qstart_file = "state_seq_viterbi.txt";
-
-int cnt = 1;
-long double P_Obs_for_Model = 0;
-ofstream uni;
+int cnt = 1, train = 0;
+long double P_O_given_Model = 0;
+ofstream uni, dump;
+FILE *common_dump;
+int environment_known = 0, is_live_testing = 0;
 
 //Calculation of alpha variable to find the solution of problem number 1.
 void forward_procedure(){
 	int i , j , t;
 	long double sum ;
 	int index = O[1];
-	P_Obs_for_Model = 0;
+	P_O_given_Model = 0;
 
 	for(i=1;i<=N;i++){
 		Alpha[1][i] = Pi[i]*B[i][index];
@@ -106,24 +96,16 @@ void forward_procedure(){
 		}
 	}
 	for(i=1;i<=N;i++){
-		P_Obs_for_Model = P_Obs_for_Model + Alpha[T][i];
+		P_O_given_Model = P_O_given_Model + Alpha[T][i];
 	}
-	// prob_seq[digit_count]=P_Obs_for_Model;
-	//cout << P_Obs_for_Model <<"\n";
-	//if(P_Obs_for_Model > max_pobs_model){
-	//	max_pobs_model = P_Obs_for_Model;
-	// 	test_ans = iteration;
-	//}
-
-	//cout << "Digit:"<<iteration<<"\tP(obs/model) : " << P_Obs_for_Model <<endl;
 }
 
 //Calculation of alpha variable to find the solution of problem number 1.
-void forward_procedure(int iteration){
+void forward_procedure(int iteration, FILE *fp = NULL){
 	int i , j , t;
 	long double sum ;
 	int index = O[1];
-	P_Obs_for_Model = 0;
+	P_O_given_Model = 0;
 
 	for(i=1;i<=N;i++){
 		Alpha[1][i] = Pi[i]*B[i][index];
@@ -139,21 +121,27 @@ void forward_procedure(int iteration){
 		}
 	}
 	for(i=1;i<=N;i++){
-		P_Obs_for_Model = P_Obs_for_Model + Alpha[T][i];
+		P_O_given_Model = P_O_given_Model + Alpha[T][i];
 	}
-	// prob_seq[digit_count]=P_Obs_for_Model;
-	//cout << P_Obs_for_Model <<"\n";
-	if(P_Obs_for_Model > max_pobs_model){
-		max_pobs_model = P_Obs_for_Model;
+	//finding where the model is matching
+	if(P_O_given_Model > max_pobs_model){
+		max_pobs_model = P_O_given_Model;
 	 	test_ans = iteration;
 	}
 
-	cout << "Digit:"<<iteration<<"\tP(obs/model) : " << P_Obs_for_Model <<endl;
+	cout << "Digit:"<<iteration<<"\tP(obs/model) : " << P_O_given_Model <<endl;
+	if(fp != NULL){
+		fprintf(fp, "---> Digit %d ----- P(Obs/Model) : %g\n", iteration, P_O_given_Model);
+		//cout << "Digit:"<<iteration<<"\tP(obs/model) : " << P_O_given_Model <<endl;
+	}
 }
 
-
-void solution_to_prob1(int iteration){
-	forward_procedure(iteration);
+//function for testing with iteration as argument
+void solution_to_prob1(int iteration, FILE *fp = NULL){
+	if(fp == NULL)
+		forward_procedure(iteration);
+	else
+		forward_procedure(iteration, fp);
 }
 
 //Calculation of Beta variable.
@@ -266,7 +254,6 @@ void reevaluate_model_parameters(){
 			//cout<<"t1/t2: "<<t1/t2<<endl;
 			//system("pause");
 			Abar[i][j] = t1/t2;
-			// cout<<"Abar: "<<Abar[i][j]<<endl;
 		}
 	}
 	//Re-evaluating B
@@ -300,6 +287,7 @@ void reevaluate_model_parameters(){
 		}
 		Bbar[ind_j][ind_k] = max - count*threshold;
 	}
+	//loading the new model
 	load_calculated_model();
 }
 
@@ -330,11 +318,13 @@ void calculate_xi(){
 
 //viterbi algorithm
 void viterbi(){
+	//initialization
     for(int i=1; i<=N; i++){
         Delta[1][i] = Pi[i] * B[i][O[1]];
         Psi[1][i] = 0;
     }
 
+	//induction
 	for(int j=1; j<=N; j++){
 		for(int t=2; t<=T; t++){
             long double max = 0, ti = 0;
@@ -353,6 +343,7 @@ void viterbi(){
         }
     }
 
+	//termination
     long double max = 0;
     for(int i=1; i<=N; i++){
         if(Delta[T][i] > max) {
@@ -363,6 +354,7 @@ void viterbi(){
         pstar = max;
     }
 
+	//backtracking
     for(int t = T-1; t>0; t--){
         Q[t] = Psi[t+1][Q[t+1]];
     }
@@ -370,8 +362,6 @@ void viterbi(){
 
 //writing updated A matrix to file
 void write_final_A_matrix(FILE *fp){
-	// FILE *fp;
-	// fp = fopen(filename,"w");
 	int i, j;
 	fprintf(fp, "---------------A Matrix----------------\n");
 	for (i = 1; i <= N; i++){
@@ -380,13 +370,10 @@ void write_final_A_matrix(FILE *fp){
 		}
 		fprintf(fp,"\n");
 	}
-	// fclose(fp);
 }
 
 //writing updated B matrix to file
 void write_final_B_matrix(FILE *fp){
-	// FILE *fp;
-	// fp = fopen(filename, "w");
 	int i, j;
 	fprintf(fp, "---------------B Matrix----------------\n");
 	for (i = 1; i <= N; i++){
@@ -395,19 +382,15 @@ void write_final_B_matrix(FILE *fp){
 		}
 		fprintf(fp, "\n");
 	}
-	// fclose(fp);
 }
 
 //writing updated pi values to file
 void write_final_pi_matrix(FILE *fp){
-	// FILE *fp;
-	// fp = fopen(filename, "w");
 	fprintf(fp, "---------------Pi values----------------\n");
 	int i, j;
 	for (i = 1; i <= N; i++){
 		fprintf(fp, "%Le   ", Pi[i]);
 	}
-	// fclose(fp);
 }
 
 //dump the model
@@ -567,6 +550,20 @@ void erase_avg_model(){
 	}
 }
 
+//reading average model
+void read_average_model(int digit){
+	
+	char filename[100];
+	sprintf(filename, "output/avgmodels/digit_%d_A.txt", digit);
+	readA(filename);
+
+	sprintf(filename, "output/avgmodels/digit_%d_B.txt", digit);
+	readB(filename);
+
+	sprintf(filename, "output/avgmodels/digit_%d_PI.txt", digit);
+	readPi(filename);
+}
+
 //initialize model according to parameters
 void initialize_model(int digit, int seq, char *filename = "--"){
 	char a_file[100], b_file[100], pi_file[100], obs_file[100];
@@ -576,13 +573,14 @@ void initialize_model(int digit, int seq, char *filename = "--"){
 		readB(B_file);
 		readPi(PI_file);
 	}else if(filename  == "avg"){
-		sprintf(a_file, "models/model_A_%d_%d.txt", digit, seq);
-		sprintf(b_file, "models/model_B_%d_%d.txt", digit, seq);
-		sprintf(pi_file, "models/model_pi_%d_%d.txt", digit, seq);
+		read_average_model(digit);
+		// sprintf(a_file, "models/model_A_%d_%d.txt", digit, seq);
+		// sprintf(b_file, "models/model_B_%d_%d.txt", digit, seq);
+		// sprintf(pi_file, "models/model_pi_%d_%d.txt", digit, seq);
 		
-		readA(a_file);
-		readB(b_file);
-		readPi(pi_file);
+		// readA(a_file);
+		// readB(b_file);
+		// readPi(pi_file);
 	}else if(filename == "init"){
 		sprintf(a_file, "validation/Digit %d/A_%d.txt", digit, digit);
 		sprintf(b_file, "validation/Digit %d/B_%d.txt", digit, digit);
@@ -628,7 +626,6 @@ void write_final_A_values(char filename[]){
 
 //writing updated b values
 void write_final_B_values(char filename[]){
-	// out.open(filename);
 	ofstream out(filename);
 	for(int i=1; i<=N; i++){
 		for(int j=1; j<=M; j++){
@@ -647,7 +644,6 @@ void write_final_pi_values(char filename[]){
 		// out << pi[i] << " ";
 		fprintf(fp, "%Le   ", Pi[i]);
 	}
-	// out.close();
 	fclose(fp);
 }
 
@@ -732,7 +728,10 @@ void get_DC_shift(){
 	double cEnergy = 0;
 
     //reading dc_shift.txt file
-    fp = fopen("silence.txt", "r");
+	if(is_live_testing == 0)
+		fp = fopen("silence.txt", "r");
+	else 
+		fp = fopen("silence_file.txt", "r");
     
     if(fp == NULL){
         printf("Silence File not found\n");
@@ -740,7 +739,7 @@ void get_DC_shift(){
     }
     
 	dcShift = 0;
-	silenceEnergy = 0;
+	silenceEnergy = 0; //resetting the silence Energy to 0
     while(!feof(fp)){
         fgets(line, 80, fp);
 		cValue = atof(line);
@@ -795,7 +794,7 @@ void setupGlobal(char *filename){
 }
 
 //Calculating Tokhura's Distance Using Code Book
-void calculate_tokhura_distance(long double c[12], int index, FILE *fp){
+void calculate_tokhura_distance(long double cepstralCoeff[12], int index, FILE *fp){
 	int  min_index = 0;
 	long double min = DBL_MAX;
 	long double sum[CB_SIZE] = { 0 };
@@ -803,7 +802,7 @@ void calculate_tokhura_distance(long double c[12], int index, FILE *fp){
 
 	for (int j = 0; j < CB_SIZE; j++){
 		for (int i = 0; i < P; i++){
-			sum[j] += tokhuraWeights[i] * (c[i] - codeBook[j][i])*(c[i] - codeBook[j][i]);
+			sum[j] += tokhuraWeights[i] * (cepstralCoeff[i] - codeBook[j][i])*(cepstralCoeff[i] - codeBook[j][i]);
 		}
 		if (sum[j] < min){
 			min = sum[j];
@@ -892,13 +891,18 @@ void calculate_c_prime(double *samp){
 	//applying raised sin window on cis
 	applyingRaisedSinWindow();
 
-	for(int i=0; i<=P; i++){
-		uni<<Ci[i]<<", ";
+	/* code for universe generation
+	for(int i=1; i<=P; i++){
+		if(i == P)
+			uni<<setw(10)<<Ci[i];
+		else
+			uni<<setw(10)<<Ci[i]<<", ";
 	}
 	uni<<endl;
+	*/
 }
 
-void trim1(){
+void trim_digit_wave(){
 	int num_frames = 0;
 	int cnt =0;
 	enSize = 0;
@@ -920,7 +924,7 @@ void trim1(){
 	for(int i=0; i<enSize; i++){
 		//printf("%d: %lf\n", i, energy[i]);
 	}
-	int min_samples = 9600;
+	int min_samples = 11200;
 
 	for(int i=0; i<enSize-4; i++){
 		if(startMarker == -1 && endMarker == -1 && energy[i+1] > multiplier * silenceEnergy && energy[i+2] > multiplier * silenceEnergy && energy[i+3] > multiplier * silenceEnergy && energy[i+4] > multiplier * silenceEnergy){
@@ -946,6 +950,7 @@ void trim1(){
 	//system("pause");
 }
 
+//[not using]
 double* trim(){
 	int i;
 	long double total_energy, current_value;
@@ -1024,17 +1029,13 @@ double* trim(){
 //generate observation sequence
 void generate_obs_sequence(char *filename){
 	int obs_ind = 1;
-	// char obs_file[100];
-	// //framing
-	// sprintf(obs_file, "output/live_test/obs_seq.txt", d, u);
 	FILE *op = fopen(filename, "w");
 	if(op == NULL) {
 		printf("locha hai idhar bhaiiiii.. \n");
 		exit(1);
 	}
 	
-	// double *frame_samples = trim();
-	trim1();
+	trim_digit_wave();
 	double fsamp[FRAME_SIZE];
 	int num_frames = 0;
 	for(int i=0; i<sampSize; i++){
@@ -1046,24 +1047,15 @@ void generate_obs_sequence(char *filename){
 		calculate_tokhura_distance(Ci, obs_ind++, op);
 	}
 	T = num_frames;
-	cout<<"Number of frames: "<<num_frames<<endl;
+	//cout<<"Number of frames: "<<num_frames<<endl;
 	fprintf(op, "\n");
 	fclose(op);
 	cout<<"wrote observation seq in file: "<<filename<<"\n";
 }
 
-//generate observation sequence
+//generate observation sequence[not using]
 void generate_obs_sequence(char *filename, FILE *op){
-	int obs_ind = 1;
-	// char obs_file[100];
-	// //framing
-	// sprintf(obs_file, "output/live_test/obs_seq.txt", d, u);
-	// FILE *op = fopen(filename, "w");
-	// if(op == NULL) {
-	// 	printf("locha hai idhar bhaiiiii.. \n");
-	// 	exit(1);
-	// }
-	
+	int obs_ind = 1;	
 	double *frame_samples = trim();
 	double fsamp[FRAME_SIZE];
 
@@ -1077,6 +1069,7 @@ void generate_obs_sequence(char *filename, FILE *op){
 	cout<<"wrote observation seq in file: "<<filename<<"\n";
 }
 
+//training particular file [not using]
 void train_file(char *filename, int digit){
 	char line[100], obs_file[100];
 	// for(int d = 0; d<=1; d++){
@@ -1141,6 +1134,7 @@ void train_file(char *filename, int digit){
 	// }
 }
 
+//making only observation sequence from the recordings folder [not using]
 void make_all_obs_seq(){
 	char filename[100], line[100], obs_file[100];
 	for(int d = 0; d<=9; d++){
@@ -1183,17 +1177,23 @@ void make_all_obs_seq(){
 	}
 }
 
+//trains the 20 files
 void training(){
-	char filename[100], line[100], obs_file[100];
+	char filename[100], line[100], obs_file[100], dump_file[100], com_dump[100];
 	erase_all_model();
+	FILE *digit_dump;
+	int total_files_trained = 20;
 
 	for(int d = 0; d<=9; d++){
 		erase_model();
 
-		// sprintf(obs_file, "output/obs_seq/HMM_OBS_SEQ_%d.txt", d);
-		// FILE *op = fopen(obs_file, "w");
+		sprintf(dump_file, "results/training/training_digit_%d.txt", d);
+		FILE *dig_dump = fopen(dump_file, "w");
+
+		fprintf(common_dump, "------------------------------------------------> DIGIT %d <------------------------------------------------\n", d);
+		fprintf(dig_dump, "------------------------------------------------> DIGIT %d <------------------------------------------------\n", d);
 		
-		for(int u = 1; u<=30; u++){
+		for(int u = 11; u <= 10 + total_files_trained; u++){
 
 			sprintf(filename, "input/recordings/Digit %d/rec_%d.txt", d, u);
 
@@ -1203,6 +1203,9 @@ void training(){
 				printf("Issue in opening file %s", filename);
 				exit(1);
 			}
+
+			fprintf(dig_dump, "\n------------------------------------------------ opening file %s ------------------------------------------------\n", filename);
+			fprintf(common_dump, "\n------------------------------------------------ opening file %s ------------------------------------------------\n", filename);
 			
 			//setting dcshift and nfactor
 			setupGlobal(filename);
@@ -1223,61 +1226,28 @@ void training(){
 			fclose(f);
 
 			//framing
-			// double frame_sample[320];
-			int obs_ind = 1;
-			// if(op == NULL) {
-			// 	printf("locha hai idhar bhaii.. \n");
-			// 	exit(1);
-			// }
-			// int num_frames = 0;
-			// double samp[320];
-			// for(int i=1,k=0;k<=(240*100) && k<sSize-240;i++,k+=240){ //calculates ci's for 320 samples frame
-			// 	num_frames++;
-			// 	for(int lmk = 0; lmk<320; lmk++)
-			// 		samp[lmk] = sample[lmk+k];
-				
-			// 	calculate_c_prime(samp);
-
-			// 	calculate_tokhura_distance(Ci, obs_ind++, op);
-			// }
-
-			// double *frame_samples = trim();
-			// double fsamp[FRAME_SIZE];
-
-			// for(int i=0; i<WIN_SIZE; i++){
-			// 	for(int j = 0; j<320; j++)
-			// 		fsamp[j] = frame_samples[i++];
-
-			// 	calculate_c_prime(fsamp);
-			// 	calculate_tokhura_distance(Ci, obs_ind++, op);
-			// }
-			// fclose(op);
-			// cout<<"wrote output/obs_seq/digit_"<<d<<"_obs_"<<u<<".txt file\n";
-			
-			//this code is imp
+			//generating observation seq
 			sprintf(obs_file, "output/obs_seq/HMM_OBS_SEQ_%d_%d.txt", d, u);
 			generate_obs_sequence(obs_file);
+			fprintf(dig_dump, "->obs seq: ");
+			fprintf(common_dump, "->obs seq: ");
+
+			for(int i=1; i<=T; i++){
+				fprintf(dig_dump, "%4d ", O[i]);
+				fprintf(common_dump, "%4d ", O[i]);
+			}
+
+			fprintf(dig_dump, "\n");
+			fprintf(common_dump, "\n");
 			
-			// fprintf(op, "\n");
-			// calculate_c_prime(samp);
-			// calculate_tokhura_distance(Ci, obs_ind++, op);
-			// fclose(op);
-
-
-			initialize_model(d, 1, "--");
+			//initializing model
+			if(train == 0)
+				initialize_model(d, 1, "--");
+			else
+				initialize_model(d, 1, "avg");
 
 			int iteration = 1;
-			// while(iteration <= CONVERGE_ITERATIONS){
-			// 	//cout<<"iteration: "<<iteration++<<endl;
-			// 	iteration++;
-			// 	forward_procedure(0);
-			// 	backward_procedure();
-			// 	viterbi();
-			// 	calculate_xi();
-			// 	calculate_gamma();
-			// 	reevaluate_model_parameters();
-			// 	//print();
-			// }
+			//starts converging model upto CONVERGE_ITERATIONS or till convergence whichever reach early
 			pstar = 0, prev_p_star = -1;
 			while(pstar > prev_p_star && iteration < 1000){
 				//cout<<"iteration: "<<iteration++<<endl;
@@ -1286,27 +1256,51 @@ void training(){
 				forward_procedure();
 				backward_procedure();
 				viterbi();
+				
+				//printing in log file
+				fprintf(dig_dump, "iteration: %d\n", iteration);
+				fprintf(dig_dump, "-->pstar : %g\n", pstar);
+				fprintf(dig_dump, "-->qstar : ");
+				for(int i=1; i<=T; i++){
+					fprintf(dig_dump, "%d ", Q[i]);
+				}
+				fprintf(dig_dump, "\n");
+
 				calculate_xi();
 				calculate_gamma();
 				//cout<<"difference: "<<prev_p_star - pstar<<endl;
 				reevaluate_model_parameters();
 			}
 
+			//writing final state sequence
+			fprintf(common_dump, "-->qstar : ");
+			for(int i=1; i<=T; i++){
+				fprintf(common_dump, "%d ", Q[i]);
+			}
+			fprintf(common_dump, "\n");
+			
+			//writing final model in the log file
+			fprintf(dig_dump, "-------------------------------Final Model Lambda (Pi, A, B) after iterations %d--------------------------------\n", iteration);
+			fprintf(common_dump, "-------------------------------Final Model Lambda (Pi, A, B) after iterations %d--------------------------------\n", iteration);
+			dump_converged_model(dig_dump);
+			dump_converged_model(common_dump);
+
 			add_to_avg_model();
 			dump_final_model(u, d);
 		}
-		// fclose(op);
-		average_of_avg_model(30);
+		fclose(dig_dump);
+		average_of_avg_model(total_files_trained);
 		dump_avg_model(d);
 		erase_avg_model();
 		
 		//system("pause");
 	}
+	train++;
 }
 
 //TO READ CODEBOOK FROM FILE
 void read_codebook(){
-	ifstream in("provided_codebook.txt");
+	ifstream in("my_codebook.txt");
 	for (int i = 0; i < CB_SIZE; i++){
 		for (int j = 0; j < P; j++){
 			in >> codeBook[i][j];
@@ -1315,19 +1309,7 @@ void read_codebook(){
 	in.close();
 }
 
-void read_average_model(int iteration){
-	
-	char filename[100];
-	sprintf(filename, "output/avgmodels/digit_%d_A.txt", iteration);
-	readA(filename);
-
-	sprintf(filename, "output/avgmodels/digit_%d_B.txt", iteration);
-	readB(filename);
-
-	sprintf(filename, "output/avgmodels/digit_%d_PI.txt", iteration);
-	readPi(filename);
-}
-
+//runs prediction by loading the model and running solution to prob1
 void test_prediction(){
 	test_ans = 0;
 	max_pobs_model = 0;
@@ -1339,6 +1321,7 @@ void test_prediction(){
 	printf("Detected digit %d\n", test_ans);
 }
 
+//performs live prediction of the data
 void live_testing(){
 	char obs_file[100], line[100];
 	printf("\n----------Live testing----------\n");
@@ -1402,13 +1385,16 @@ void print(){
 	}
 }
 
-
+//function to validate output each model
 void validation(){
 	char filename[100], line[100];
 	initialize_model(1, 0);
 
 	int iteration = 0;
 	ofstream dump("dump.txt");
+
+
+	////////////////////////////////Block to use sir's data/////////////////////////////////////
 
 	// ifstream fin("validation/Digit 1/obs_seq_1.txt");
 	// int temp;
@@ -1429,7 +1415,10 @@ void validation(){
 	// }
 	// cout<<endl;
 
+	///////////////////////////////////////////////////////////////////////////////////////////
 
+
+	/////////////////////////////Block to use own recordings //////////////////////////////////
 	sprintf(filename, "input/recordings/Digit 0/rec_1.txt");
 
 	FILE *f = fopen(filename, "r");
@@ -1461,6 +1450,9 @@ void validation(){
 	sprintf(obs_file, "output/delete/HMM_OBS_SEQ_delete.txt");
 	generate_obs_sequence(obs_file);
 
+	///////////////////////////////////////////////////////////////////////////////////////////
+
+	//convergence of the model
 	while(pstar > prev_p_star){
 		//cout<<"iteration: "<<iteration++<<endl;
 		iteration++;
@@ -1542,20 +1534,28 @@ void validation(){
 
 }
 
+//function to test the models
 void testing(){
-	char filename[100], line[100];
-	int correctAns = 0;
+	char filename[100], line[100], test_file[100];
+	int correctAns = 0, totalCorrectAns = 0;
+
 	for(int d = 0; d<=9; d++){
-
-		for(int j = 21; j<=30; j++){
+		sprintf(test_file, "results/testing/offline/offline_testing_digit_%d.txt", d);
+		FILE *fp = fopen(test_file, "w");
+		correctAns = 0;
+		fprintf(fp, "--------------------------------------------* Digit %d *--------------------------------------------------------\n", d);
+		
+		for(int j = 1; j<=10; j++){
 			sprintf(filename, "input/recordings/Digit %d/rec_%d.txt", d, j);
-			printf("\n--------Reading input from the file: %s------\n\n", filename);
-
+			printf("\n\n--------Reading input from the file: %s------\n", filename);
+			
 			FILE *f = fopen(filename, "r");
 			if(f == NULL){
 				printf("Issue in opening file input_file.txt");
 				exit(1);
 			}
+			fprintf(fp, "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n");
+			fprintf(fp, "\n---------> Reading file %s <---------\n", filename);
 
 			//setting dcshift and nfactor
 			setupGlobal(filename);
@@ -1569,38 +1569,56 @@ void testing(){
 				if(!isalpha(line[0])){
 					int y = atof(line);
 					double normalizedX = floor((y-dcShift)*nFactor);
-					//if(abs(normalizedX) > 1)
 					sample[sSize++] = normalizedX;
 				}
 			}
 			fclose(f);
+
+			//generating observation sequence
 			generate_obs_sequence("output/live_test/obs_seq.txt");
+
+			fprintf(fp, "observation seq obtained -- ");
+			for(int i=1; i<=T; i++){
+				fprintf(fp, "%d\t", O[i]);
+			}
+			fprintf(fp, "\n");
 
 			test_ans = 0;
 			max_pobs_model = 0;
 			for(int k = 0; k<=9; k++){
 				read_average_model(k);
-				solution_to_prob1(k);
+				solution_to_prob1(k, fp);
 				erase_avg_model();
 			}
-			printf("Predicted utterance: %d", test_ans);
-			if(test_ans == d) correctAns++;
+			
+			printf("\nPredicted utterance: %d\n", test_ans);
+			printf("Actual utterance: %d\n", d);
+
+			fprintf(fp, "Predicted utterance: %d\n", test_ans);
+			fprintf(fp, "Actual utterance: %d\n", d);
+			if(test_ans == d) correctAns++, totalCorrectAns++;
 		}
+		printf("Accuracy for the digit %d is : %lf % \n", d, (correctAns / 10.0f)*100);
+		fprintf(fp, "Accuracy for the digit %d is : %lf % \n", d, (correctAns / 10.0f)*100);
+		//system("pause");
+		fclose(fp);
 	}
 
-	printf("Accuracy of the system: %lf\n\n", correctAns / 100.0f);
+	printf("Accuracy of the system: %d %\n\n", totalCorrectAns);
 }
 
-
+//driver function
 int _tmain(int argc, _TCHAR* argv[]){
 
-	printf("--------------Recording silence--------------\n");
-	//system("Recording_Module.exe 3 silence.wav silence_file.txt");
-
-	uni.open("universe.csv");
-
+	//uni.open("universe.csv");
+	char com_dump[100];
+	sprintf(com_dump, "results/training/common_dump.txt");
+	common_dump = fopen(com_dump, "w");
+	
 	read_codebook();
-	training();
+	
+	//training();
+	
 	char choice;
 	
 	while(1){
@@ -1620,16 +1638,24 @@ int _tmain(int argc, _TCHAR* argv[]){
 				}
 			case '3':
 				{
+					if(environment_known == 0){
+						printf("--------------Recording silence--------------\n");
+						system("Recording_Module.exe 3 silence.wav silence_file.txt");	
+						environment_known = 1;
+					}
+					is_live_testing = 1;
 					live_testing();
+					is_live_testing = 0;
 					break;
+				}
+			case '0':
+				{
+					cout<<"Exiting the program\n";
+					return 0;
 				}
 		}
 	}
-	// validation();
-	// train_file("input/recordings/Digit 0/rec_11.txt", 0);
 	
-	//initialize_model('1', 1, "avg");
-	
-	uni.close();
+	//uni.close();
 	return 0;
 }

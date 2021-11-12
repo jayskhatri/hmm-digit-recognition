@@ -1,0 +1,162 @@
+--------------------------------------------* Digit 1 *--------------------------------------------------------
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+
+---------> Reading file input/recordings/Digit 1/rec_1.txt <---------
+observation seq obtained -- 14	20	20	20	19	19	8	18	18	17	17	17	18	17	17	17	17	4	9	11	11	9	9	9	9	11	9	11	11	11	9	11	14	14	10	
+---> Digit 0 ----- P(Obs/Model) : 7.91451e-045
+---> Digit 1 ----- P(Obs/Model) : 2.27798e-031
+---> Digit 2 ----- P(Obs/Model) : 2.79271e-039
+---> Digit 3 ----- P(Obs/Model) : 5.33423e-051
+---> Digit 4 ----- P(Obs/Model) : 3.16228e-072
+---> Digit 5 ----- P(Obs/Model) : 1.28512e-044
+---> Digit 6 ----- P(Obs/Model) : 2.03167e-055
+---> Digit 7 ----- P(Obs/Model) : 1.7245e-038
+---> Digit 8 ----- P(Obs/Model) : 4.59941e-279
+---> Digit 9 ----- P(Obs/Model) : 4.30573e-047
+Predicted utterance: 1
+Actual utterance: 1
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+
+---------> Reading file input/recordings/Digit 1/rec_2.txt <---------
+observation seq obtained -- 24	17	17	17	19	8	8	22	19	17	17	10	10	10	17	17	23	23	9	11	11	11	9	11	11	11	11	11	9	9	11	11	11	9	10	
+---> Digit 0 ----- P(Obs/Model) : 1.0278e-078
+---> Digit 1 ----- P(Obs/Model) : 6.58861e-058
+---> Digit 2 ----- P(Obs/Model) : 8.6126e-098
+---> Digit 3 ----- P(Obs/Model) : 7.07552e-126
+---> Digit 4 ----- P(Obs/Model) : 1.11689e-048
+---> Digit 5 ----- P(Obs/Model) : 1.21118e-046
+---> Digit 6 ----- P(Obs/Model) : 4.98056e-057
+---> Digit 7 ----- P(Obs/Model) : 5.31168e-036
+---> Digit 8 ----- P(Obs/Model) : 3.79128e-288
+---> Digit 9 ----- P(Obs/Model) : 1.66954e-101
+Predicted utterance: 7
+Actual utterance: 1
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+
+---------> Reading file input/recordings/Digit 1/rec_3.txt <---------
+observation seq obtained -- 18	18	23	23	8	19	19	17	10	17	17	17	17	17	23	12	11	11	9	11	11	11	11	9	9	9	9	11	11	11	11	9	11	9	10	
+---> Digit 0 ----- P(Obs/Model) : 3.53313e-045
+---> Digit 1 ----- P(Obs/Model) : 4.23224e-025
+---> Digit 2 ----- P(Obs/Model) : 8.13563e-041
+---> Digit 3 ----- P(Obs/Model) : 3.71416e-062
+---> Digit 4 ----- P(Obs/Model) : 8.25536e-048
+---> Digit 5 ----- P(Obs/Model) : 3.91582e-047
+---> Digit 6 ----- P(Obs/Model) : 2.36198e-054
+---> Digit 7 ----- P(Obs/Model) : 7.98262e-033
+---> Digit 8 ----- P(Obs/Model) : 1.62895e-263
+---> Digit 9 ----- P(Obs/Model) : 8.84555e-042
+Predicted utterance: 1
+Actual utterance: 1
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+
+---------> Reading file input/recordings/Digit 1/rec_4.txt <---------
+observation seq obtained -- 12	12	17	12	12	17	10	12	23	19	23	19	18	17	17	17	19	19	18	11	11	9	9	11	9	9	9	9	11	11	11	9	9	9	10	
+---> Digit 0 ----- P(Obs/Model) : 4.8899e-047
+---> Digit 1 ----- P(Obs/Model) : 3.28911e-027
+---> Digit 2 ----- P(Obs/Model) : 1.28459e-041
+---> Digit 3 ----- P(Obs/Model) : 5.40467e-072
+---> Digit 4 ----- P(Obs/Model) : 1.32749e-049
+---> Digit 5 ----- P(Obs/Model) : 1.59788e-043
+---> Digit 6 ----- P(Obs/Model) : 4.21913e-053
+---> Digit 7 ----- P(Obs/Model) : 5.1065e-035
+---> Digit 8 ----- P(Obs/Model) : 7.9928e-205
+---> Digit 9 ----- P(Obs/Model) : 1.51314e-046
+Predicted utterance: 1
+Actual utterance: 1
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+
+---------> Reading file input/recordings/Digit 1/rec_5.txt <---------
+observation seq obtained -- 16	14	12	7	4	19	22	8	8	8	23	18	23	17	19	19	19	19	10	11	11	9	6	9	11	11	11	11	11	9	12	12	31	20	10	
+---> Digit 0 ----- P(Obs/Model) : 2.1121e-081
+---> Digit 1 ----- P(Obs/Model) : 2.17016e-054
+---> Digit 2 ----- P(Obs/Model) : 7.13513e-086
+---> Digit 3 ----- P(Obs/Model) : 8.83191e-085
+---> Digit 4 ----- P(Obs/Model) : 2.79062e-137
+---> Digit 5 ----- P(Obs/Model) : 1.90593e-101
+---> Digit 6 ----- P(Obs/Model) : 4.26992e-068
+---> Digit 7 ----- P(Obs/Model) : 8.32763e-065
+---> Digit 8 ----- P(Obs/Model) : 3.57027e-139
+---> Digit 9 ----- P(Obs/Model) : 7.99485e-066
+Predicted utterance: 1
+Actual utterance: 1
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+
+---------> Reading file input/recordings/Digit 1/rec_6.txt <---------
+observation seq obtained -- 18	18	10	10	12	10	8	23	8	17	17	17	17	19	18	9	11	9	9	11	9	9	9	9	11	11	9	9	9	9	9	11	11	11	10	
+---> Digit 0 ----- P(Obs/Model) : 1.07723e-041
+---> Digit 1 ----- P(Obs/Model) : 4.47196e-025
+---> Digit 2 ----- P(Obs/Model) : 1.71762e-034
+---> Digit 3 ----- P(Obs/Model) : 4.14931e-053
+---> Digit 4 ----- P(Obs/Model) : 8.87897e-049
+---> Digit 5 ----- P(Obs/Model) : 5.95516e-048
+---> Digit 6 ----- P(Obs/Model) : 9.91103e-058
+---> Digit 7 ----- P(Obs/Model) : 9.53037e-039
+---> Digit 8 ----- P(Obs/Model) : 1.47104e-186
+---> Digit 9 ----- P(Obs/Model) : 7.67855e-045
+Predicted utterance: 1
+Actual utterance: 1
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+
+---------> Reading file input/recordings/Digit 1/rec_7.txt <---------
+observation seq obtained -- 20	20	8	10	17	18	29	19	23	18	17	17	18	23	23	23	7	12	9	9	9	9	9	9	9	9	9	9	11	9	9	11	11	12	10	
+---> Digit 0 ----- P(Obs/Model) : 7.44252e-047
+---> Digit 1 ----- P(Obs/Model) : 4.31437e-030
+---> Digit 2 ----- P(Obs/Model) : 2.32783e-040
+---> Digit 3 ----- P(Obs/Model) : 1.55078e-051
+---> Digit 4 ----- P(Obs/Model) : 1.13014e-045
+---> Digit 5 ----- P(Obs/Model) : 2.39846e-043
+---> Digit 6 ----- P(Obs/Model) : 8.94259e-054
+---> Digit 7 ----- P(Obs/Model) : 2.89096e-038
+---> Digit 8 ----- P(Obs/Model) : 2.45744e-177
+---> Digit 9 ----- P(Obs/Model) : 1.97154e-041
+Predicted utterance: 1
+Actual utterance: 1
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+
+---------> Reading file input/recordings/Digit 1/rec_8.txt <---------
+observation seq obtained -- 18	18	18	10	9	9	8	8	18	18	17	17	19	19	17	11	11	9	9	9	9	9	11	11	9	9	9	9	9	11	11	11	13	12	10	
+---> Digit 0 ----- P(Obs/Model) : 3.39037e-056
+---> Digit 1 ----- P(Obs/Model) : 2.2703e-028
+---> Digit 2 ----- P(Obs/Model) : 4.14523e-037
+---> Digit 3 ----- P(Obs/Model) : 3.76837e-056
+---> Digit 4 ----- P(Obs/Model) : 8.02219e-050
+---> Digit 5 ----- P(Obs/Model) : 6.99119e-049
+---> Digit 6 ----- P(Obs/Model) : 1.78431e-085
+---> Digit 7 ----- P(Obs/Model) : 3.30669e-040
+---> Digit 8 ----- P(Obs/Model) : 1.15487e-151
+---> Digit 9 ----- P(Obs/Model) : 9.0212e-046
+Predicted utterance: 1
+Actual utterance: 1
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+
+---------> Reading file input/recordings/Digit 1/rec_9.txt <---------
+observation seq obtained -- 30	14	12	18	13	10	17	17	10	12	7	7	18	17	17	19	19	10	9	9	9	9	9	9	11	11	11	11	11	11	11	11	11	11	10	
+---> Digit 0 ----- P(Obs/Model) : 1.63655e-046
+---> Digit 1 ----- P(Obs/Model) : 3.35262e-030
+---> Digit 2 ----- P(Obs/Model) : 7.72802e-039
+---> Digit 3 ----- P(Obs/Model) : 1.08758e-076
+---> Digit 4 ----- P(Obs/Model) : 3.3949e-055
+---> Digit 5 ----- P(Obs/Model) : 7.56607e-048
+---> Digit 6 ----- P(Obs/Model) : 6.07046e-054
+---> Digit 7 ----- P(Obs/Model) : 1.14285e-036
+---> Digit 8 ----- P(Obs/Model) : 9.63256e-172
+---> Digit 9 ----- P(Obs/Model) : 2.14798e-045
+Predicted utterance: 1
+Actual utterance: 1
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+
+---------> Reading file input/recordings/Digit 1/rec_10.txt <---------
+observation seq obtained -- 12	23	23	17	17	10	10	10	18	23	8	8	17	17	17	19	18	11	9	11	6	9	6	6	9	11	11	9	9	9	9	9	9	9	10	
+---> Digit 0 ----- P(Obs/Model) : 9.04366e-054
+---> Digit 1 ----- P(Obs/Model) : 1.52399e-030
+---> Digit 2 ----- P(Obs/Model) : 1.74721e-040
+---> Digit 3 ----- P(Obs/Model) : 1.14752e-068
+---> Digit 4 ----- P(Obs/Model) : 1.13808e-129
+---> Digit 5 ----- P(Obs/Model) : 1.67663e-130
+---> Digit 6 ----- P(Obs/Model) : 5.8593e-057
+---> Digit 7 ----- P(Obs/Model) : 1.44628e-040
+---> Digit 8 ----- P(Obs/Model) : 1.70361e-211
+---> Digit 9 ----- P(Obs/Model) : 1.01599e-046
+Predicted utterance: 1
+Actual utterance: 1
+Accuracy for the digit 1 is : 90.000000 
